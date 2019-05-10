@@ -3,7 +3,7 @@ import numpy as np
 from util.helper import max_type
 
 
-class Photo(object):
+class Image(object):
     def __init__(self, name, img_data, cc_name):
         '''
         __init__(name(str), img_data(numpy.ndarray, 2 or 3 D),
