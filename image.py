@@ -62,3 +62,24 @@ class Image(object):
             self.data = tmp
         else:
             return tmp
+
+    def saveTo(self, filename, img_format=None):
+        '''
+        saveTo(filename(str), img_format(str))
+
+        Save the image to certain format with given file name. Image format
+        can be inferred from file name suffix.
+
+        filename: str, file name to save to.
+        img_format: str, default None. Image format. If None, it will be
+                    inferred from filename.
+        '''
+        if img_format is None:
+            imf = filename.rsplit('.', 1)[-1]
+        else:
+            imf = img_format
+        if imf in ["jpg", "jpeg", "png", "gif", "bmp"]:
+            img_save = self.convertTo(np.uint8, overwrite=False)
+        else:
+            img_save = self.data
+        cv2.imwrite(filename, img_save)
