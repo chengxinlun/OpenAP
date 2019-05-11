@@ -7,3 +7,4 @@ Well, it might not be limited to OpenCV, but surely there are a lot of functiona
 * Checking histogram
 * Gamma correction
 * Local Histogram Equilization
+* Simple star detection
