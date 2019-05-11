@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 
 
@@ -14,3 +15,15 @@ def max_type(dtype):
         return 1.0
     else:
         return np.iinfo(dtype).max
+
+
+def toGrayScale(img_data):
+    '''
+    toGrayScale(img_data(3D numpy.ndarray))
+
+    Transform input image to gray scale. Note that we assume the input is
+    in BGR.
+
+    img_data: 3D numpy.ndarray
+    '''
+    return cv2.cvtColor(img_data, cv2.COLOR_BGR2GRAY)

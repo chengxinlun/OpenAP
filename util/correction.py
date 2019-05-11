@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 from .helper import max_type
 
