@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from util.helper import max_type
+from .util.helper import max_type
 
 
 class Image(object):

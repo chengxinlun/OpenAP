@@ -11,7 +11,7 @@ def max_type(dtype):
 
     dtype: numpy.dtype
     '''
-    if dtype == np.float32:
+    if dtype == np.float32 or dtype == np.float64:
         return 1.0
     else:
         return np.iinfo(dtype).max
