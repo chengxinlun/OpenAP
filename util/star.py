@@ -1,7 +1,11 @@
 import cv2
+import logging
 import numpy as np
 from scipy.optimize import curve_fit
 from .helper import max_type
+
+
+__all__ = ["starDetection", "_starFitting", "starFitting"]
 
 
 def starDetection(img_data, minThres, minRadius, minCirc, minInertia):
@@ -55,15 +59,19 @@ def _starFitting(img_data, keypoint, fitFunction, fitRadius):
                         coord[0] - fitRadius: coord[0] + fitRadius + 1]
     fit_data = fit_data.astype(np.float32)
     if np.max(fit_data) > 0.9 * max_type(img_data.dtype):
-        raise ValueError("Star saturated. Skip fitting.")
+        raise ValueError("Star " + str(coord) + " saturated. Skip fitting.")
     xx = np.linspace(-fitRadius, fitRadius, 2 * fitRadius + 1,
                      dtype=np.float32)
     X, Y = np.meshgrid(xx, xx)
     pos = np.array([X.ravel(), Y.ravel()]).T
     ig = [np.max(fit_data), 0.0, 0.0, keypoint.size * 0.1, 0.0, 0.0,
           keypoint.size * 0.1, 0.0]
-    popt, pcov = curve_fit(fitFunction, pos, fit_data.ravel(), p0=ig,
-                           maxfev=200000)
+    try:
+        popt, pcov = curve_fit(fitFunction, pos, fit_data.ravel(), p0=ig,
+                               maxfev=200000)
+    except Exception as reason:
+        raise RuntimeError("Star " + str(coord) + " failed to fit: " +
+                           str(reason))
     fit_res = fitFunction(pos, *popt).reshape(2 * fitRadius + 1,
                                               2 * fitRadius + 1)
     res = popt
@@ -86,13 +94,15 @@ def starFitting(img_data, keypointList, fitFunction, fitRadius=8):
                  g_00, g_01, g_10, g_11 (coefficients for xx, xy, yx, yy))
     fitRadius: int, defualt 8. Radius to fit
     '''
+    np.seterr("raise")
     g_mu_nu = [[], [], [], []]
     residual = []
     for each in keypointList:
         try:
             res = _starFitting(img_data, each, fitFunction, fitRadius)
-        except Exception as reason:
-            print(str(each.pt) + ": " + str(reason))
+        except Exception as exce:
+            logger = logging.getLogger(__name__)
+            logger.warning(str(exce))
             continue
         residual.append(res[1])
         for i in range(4):

@@ -2,6 +2,9 @@ import numpy as np
 from .helper import max_type
 
 
+__all__ = ["gammaCorrection"]
+
+
 def gammaCorrection(img_data, gamma):
     '''
     gammaCorrection(img_data(2 or 3D numpy.ndarray), gamma(float))

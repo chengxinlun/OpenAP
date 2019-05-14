@@ -4,6 +4,9 @@ import numpy as np
 from .helper import max_type
 
 
+__all__ = ["calcHist", "plotHist"]
+
+
 def calcHist(img_data):
     '''
     calcHist(img_data)
