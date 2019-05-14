@@ -1,2 +1,2 @@
 def package_test():
-    return(u'test_package')
+    return(u'test_update')
