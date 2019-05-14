@@ -1,2 +1,1 @@
-def package_test():
-    return(u'test_update')
+from .helper import max_type
