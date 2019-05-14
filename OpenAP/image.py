@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
-from .helper import max_type
+import helper
+
+
+__all__ = ["Image"]
 
 
 class Image(object):
@@ -43,7 +46,7 @@ class Image(object):
     def getColorChannelName(self):
         return self.color
 
-    def convertTo(self, dtype, overwrite=True):
+    def convertTo(self, dtype, overwrite=False):
         '''
         convertTo(dtype(numpy.dtype), overwrite(boolean))
 
@@ -55,9 +58,7 @@ class Image(object):
                numpy.uint16. Seldomly, it can be numpy.float32.
         overwrite: boolean, whether overwrite data or not.
         '''
-        if dtype != self.data.dtype:
-            tmp = dtype(self.data / max_type(self.data.dtype) *
-                        max_type(dtype))
+        tmp = helper.convertTo(self.data, dtype)
         if overwrite:
             self.data = tmp
         else:

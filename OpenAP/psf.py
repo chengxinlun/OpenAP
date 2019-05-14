@@ -2,6 +2,9 @@ from numba import jit
 import numpy as np
 
 
+__all__ = ["gaussian2D"]
+
+
 @jit
 def gaussian2D(x, amp, mu_x, mu_y, sigma_xx, sigma_xy, sigma_yx, sigma_yy,
                offset):

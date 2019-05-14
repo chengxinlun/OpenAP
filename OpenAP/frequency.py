@@ -1,14 +1,14 @@
 import numpy as np
 from skimage import restoration
-from . import image
+from .helper import convertTo
+
+
+__all__ = ['rlDeconvolve']
 
 
 def rlDeconvolve(img_data, psfFunction, psfParam, psfWidth=16, iterations=30):
-    if img_data.dtype != np.float64:
-        img_class_64 = image.Image("tmp", img_data, [])
-        img_data_64 = img_class_64.convertTo(np.float64, overwrite=False)
-    else:
-        img_data_64 = img_data
+    # skimage.restoration.richardson_lucy accepts float64 as input
+    img_data_64 = convertTo(img_data, np.float64)
     # Set up PSF
     xx = np.linspace(-psfWidth, psfWidth, 2 * psfWidth + 1, dtype=np.float32)
     X, Y = np.meshgrid(xx, xx)
@@ -16,6 +16,7 @@ def rlDeconvolve(img_data, psfFunction, psfParam, psfWidth=16, iterations=30):
     psf = psfFunction(pos, 1.0, 0.0, 0.0, psfParam[0], psfParam[1],
                       psfParam[2], psfParam[3], 0.0).reshape(2 * psfWidth + 1,
                                                              2 * psfWidth + 1)
+    # Deconvolve
     if img_data_64.ndim != 3:
         img_deconv = restoration.richardson_lucy(img_data_64, psf,
                                                  iterations=iterations)
