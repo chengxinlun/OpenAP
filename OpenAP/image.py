@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from .util import helper
+from .helper import convertTo
 
 
 __all__ = ["Image"]
@@ -58,7 +58,7 @@ class Image(object):
                numpy.uint16. Seldomly, it can be numpy.float32.
         overwrite: boolean, whether overwrite data or not.
         '''
-        tmp = helper.convertTo(self.data, dtype)
+        tmp = convertTo(self.data, dtype)
         if overwrite:
             self.data = tmp
         else:
