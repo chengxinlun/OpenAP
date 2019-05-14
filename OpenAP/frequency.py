@@ -1,6 +1,6 @@
 import numpy as np
 from skimage import restoration
-from .. import image
+from . import image
 
 
 def rlDeconvolve(img_data, psfFunction, psfParam, psfWidth=16, iterations=30):
