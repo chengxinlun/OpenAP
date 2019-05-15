@@ -13,10 +13,11 @@
 * Checking histogram
 * Deconvolution
 * Gamma correction
-* Local Histogram Equilization
+* Local histogram equilization
 * Logging
 * Simple star detection
 * Star (PSF) fitting with 2D Gaussian (more PSF models in development)
+* Star size reduction
 
 ## Example
 Example in ```OpenAP/tests```
