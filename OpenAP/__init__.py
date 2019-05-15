@@ -7,4 +7,5 @@ from .histogram  import (calcHist, plotHist)
 from .image      import Image
 from .logging    import setupLogger
 from .psf        import gaussian2D
-from .star       import (starDetection, _starFitting, starFitting)
+from .star       import (blobStarDetection, dogStarMask, gbDog, _starFitting,
+                         starFitting, starSizeReduction)

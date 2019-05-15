@@ -4,10 +4,11 @@ from OpenAP.image import Image
 from OpenAP.correction import gammaCorrection
 from OpenAP.frequency import rlDeconvolve
 from OpenAP.helper import convertTo, toGrayScale
-from OpenAP.histogram import applyLHE
+from OpenAP.histogram import applyLHE, plotHist
 from OpenAP.logging import setupLogger
 from OpenAP.psf import gaussian2D
-from OpenAP.star import starDetection, starFitting
+from OpenAP.star import (dogStarMask, blobStarDetection, starFitting,
+                         starSizeReduction)
 
 
 # Set up logger
@@ -24,12 +25,22 @@ img_lhe = applyLHE(img_gamma, 10.0, (16, 16))
 # Star detection
 img_8 = convertTo(img_lhe, np.uint8)
 img_gray = toGrayScale(img_8)
-kp = starDetection(img_gray, 25.0, 2, 0.8, 0.7)
+# Star mask
+star_mask = dogStarMask(img_gray, 3, 4.5, 125)
+erosion_mask = np.array([[0, 1, 1, 1, 0],
+                         [1, 1, 1, 1, 1],
+                         [1, 1, 1, 1, 1],
+                         [1, 1, 1, 1, 1],
+                         [0, 1, 1, 1, 0]], dtype=np.uint8)
+img_star_reduced = starSizeReduction(img_lhe, star_mask, erosion_mask,
+                                     ratio=0.5, eroIter=2, dilIter=3)
+cv2.imwrite("star_reduced.tif", img_star_reduced)
+'''
+kp = blobStarDetection(img_gray, 25.0, 2, 0.8, 0.7)
 print("Number of stars: " + str(len(kp)))
 img_kp = cv2.drawKeypoints(img_8, kp, np.array([]), (0, 0, 255),
                            cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 cv2.imwrite("MilkyWay_stars.png", img_kp)
-cv2.imwrite("MilkyWay_gamma_lhe.png", img_8)
 # 2D Gaussian fitting
 sigma_matrix, residual = starFitting(img_lhe[:, :, 0], kp, gaussian2D)
 print("Number of stars fitted: " + str(len(sigma_matrix[0])))
@@ -40,3 +51,4 @@ img_deconv = rlDeconvolve(img_lhe, gaussian2D,
 # Create a new image and save
 img_deconv_8 = Image("Deconv", img_deconv, ["B", "G", "R"])
 img_deconv_8.saveTo("MilkyWay_gamma_lhe_deconv.png")
+'''
