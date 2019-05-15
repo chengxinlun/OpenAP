@@ -8,6 +8,10 @@
 * Scipy
 * Scikit-image
 
+
+## Install
+```pip install astropenap```
+
 ## Current Functionalities
 * 8-bit, 16-bit, 32-bit image conversion
 * Checking histogram
