@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cv2
 import logging
 import numpy as np
@@ -5,42 +6,8 @@ from scipy.optimize import curve_fit
 from .helper import max_type, toGrayScale, convertTo
 
 
-__all__ = ["blobStarDetection", "dogStarMask", "gbDog", "_starFitting",
-           "starFitting", "starSizeReduction"]
-
-
-def dogStarMask(img_data, sigma01, sigma02, thres):
-    '''
-    dogStarMask(img_data(2D or 3D numpy.ndarray), sigma01(float),
-                simga02(float), thres(int or float))
-
-    Difference of Gaussians (DOG) star detection. DOG can extract darker stars
-    than SimpleBlob. However, the quality of stars is not suitable for star
-    fitting.
-
-    img_data: 2D or 3D numpy.ndarray, input image data
-    sigma01: float, sigma of the first Gaussian blur
-    sigma02: float, sigma of the second Gaussian blur
-    thres: same dtype with img_data, threshold to mask. Value above this
-           threshold will be set to 255 and those below to 0.
-    '''
-    gb01 = gbDog(img_data, sigma01)
-    gb02 = gbDog(img_data, sigma02)
-    dog = gb02 - gb01
-    # Convert to mask
-    dog[dog < thres] = 0
-    dog[dog >= thres] = 255
-    dog = dog.astype(np.uint8)
-    return dog
-
-
-def gbDog(img_data, sigma):
-    '''
-    gbDog(img_data(2D or 3D numpy.ndarray), sigma(float))
-
-    Gaussian blur for DOG.
-    '''
-    return cv2.GaussianBlur(img_data, (0, 0), sigma)
+__all__ = ["blobStarDetection", "_starFitting", "starFitting",
+           "starSizeReduction"]
 
 
 def starSizeReduction(img_data, starMask, erosionMask, ratio=0.5, eroIter=1,

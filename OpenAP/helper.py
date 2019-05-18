@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import cv2
 import numpy as np
 
 
 __all__ = ["max_type", "toGrayScale", "convertTo"]
+
 
 def max_type(dtype):
     '''
@@ -44,8 +46,10 @@ def convertTo(img_data, dtype):
            numpy.uint16. Seldomly, it can be numpy.float32.
     '''
     if dtype != img_data.dtype:
-        tmp = dtype(img_data / max_type(img_data.dtype) *
-                    max_type(dtype))
+        tmp = img_data.astype(np.float64) / max_type(img_data.dtype) * \
+            max_type(dtype)
+        np.clip(tmp, 0.0, max_type(dtype), out=tmp)
+        tmp = tmp.astype(dtype)
     else:
         tmp = img_data
     return tmp

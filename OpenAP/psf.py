@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from numba import jit
 import numpy as np
 

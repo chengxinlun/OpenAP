@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from .helper import max_type
 
 
-__all__ = ["calcHist", "plotHist"]
+__all__ = ["calcHist", "plotHist", "applyLHE"]
 
 
 def calcHist(img_data):
