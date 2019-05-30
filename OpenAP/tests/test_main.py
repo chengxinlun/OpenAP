@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-import pywt
-from OpenAP.image import Image
 from OpenAP.correction import gammaCorrection
 from OpenAP.frequency import aTrousTransform, iATrousTransform, starletKernel
 from OpenAP.helper import convertTo, toGrayScale
 from OpenAP.histogram import applyLHE, plotHist
+from OpenAP.image import Image
 from OpenAP.logging import setupLogger
 from OpenAP.mask import dogStarMask
 from OpenAP.psf import gaussian2D
