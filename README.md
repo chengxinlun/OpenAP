@@ -14,7 +14,8 @@
 
 ## Current Functionalities
 * 8-bit, 16-bit, 32-bit image conversion
-* Deconvolution
+* Background subtraction (gradient removal included)
+* Deconvolution (NOT recommended due to lack of deringing algorithm)
 * Gamma correction
 * High dynamic range 2D deconvolution
 * Histogram
@@ -27,3 +28,5 @@
 
 ## Example
 Example in ```OpenAP/tests```
+```test_main.py``` outlines workflow associated with Milky Way image processing (or any image with extended nebulosity).
+```test_dso.py``` outlines workflow associated with galaxies and star clusters image processing (image with little to none nebulosity).
