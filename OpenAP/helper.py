@@ -46,8 +46,7 @@ def convertTo(img_data, dtype):
            numpy.uint16. Seldomly, it can be numpy.float32.
     '''
     if dtype != img_data.dtype:
-        tmp = img_data.astype(np.float64) / max_type(img_data.dtype) * \
-            max_type(dtype)
+        tmp = np.float64(img_data) / max_type(img_data.dtype) * max_type(dtype)
         np.clip(tmp, 0.0, max_type(dtype), out=tmp)
         tmp = tmp.astype(dtype)
     else:

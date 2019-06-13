@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
+from .color import getLuminance
 from .helper import max_type, convertTo
 
 
-__all__ = ["dogStarMask", "gbDog"]
+__all__ = ["dogStarMask", "gbDog", "globalSigmaMask"]
 
 
 def dogStarMask(img_data, sigma01, sigma02, dtype=np.uint8, binary=True,
@@ -42,3 +43,43 @@ def gbDog(img_data, sigma):
     Gaussian blur for DOG.
     '''
     return cv2.GaussianBlur(img_data, (0, 0), sigma)
+
+
+def globalSigmaMask(img_data, thres, bgrWeight, dtype=np.uint8, binary=True):
+    '''
+    Global sigma mask
+
+    For colored images:
+    Convert image to Luminosity and mask everything under med + thres * std
+
+    For monocolor images:
+    Mask everything under med + thres * std
+
+    Parameters
+    ----------
+    img_data: 3D or 2D numpy.ndarray
+        The input image data
+
+    thres: float
+        Threshold for sigma clipping
+
+    bgrWeight: 1D numpy.ndarray with shape == (3,)
+        Only applicable for colored images, the weight for luminance
+
+    dtype: numpy.dtype, default numpy.uint8
+        dtype of return
+
+    binary: boolean, default True
+        Whether the mask is binary or not
+    '''
+    if img_data.ndim == 3:
+        img_lum = getLuminance(img_data, bgrWeight)
+    else:
+        img_lum = img_data
+    img_mask = np.zeros(img_lum.shape, dtype=dtype)
+    img_clip = np.median(img_lum) + thres * np.std(img_lum)
+    if binary:
+        img_mask[img_lum > img_clip] = max_type(dtype)
+    else:
+        img_mask[img_lum > img_clip] = img_lum[img_lum > img_clip]
+    return img_mask

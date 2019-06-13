@@ -69,9 +69,11 @@ def gridBackgroundRemove(img_data, gSize=64, doMask=None, skipThres=0.75,
                                           infillLength, cv2.INPAINT_NS)
     else:
         img_bg = cv2.inpaint(img_bg, img_bg_mask, infillLength, cv2.INPAINT_NS)
+    # Smooth the background
     if smoothSigma is not None:
         img_bg = cv2.GaussianBlur(img_bg, (0, 0), smoothSigma)
-    return img_data - img_bg
+    img_no_bg = img_data - img_bg
+    return img_no_bg
 
 
 @jit

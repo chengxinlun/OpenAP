@@ -49,18 +49,19 @@ img_deconv = rlDeconvolve(img_class_init.getData(), gaussian2D, sigma_matrix,
                           psfWidth=5)
 np.save("deconv.npy", img_deconv)
 img_deconv = convertTo(img_deconv, np.uint16)
-'''
 img_ist = np.empty(img_class_init.getData().shape, dtype=np.float64)
 for i in range(3):
     img_st = aTrousTransform(img_data[:, :, i], starletKernel, max_level=5)
     img_ist[:, :, i] = iATrousTransform(img_st, starletKernel)
 img_l_final = convertTo(img_ist, np.uint16)
+'''
+img_l_final = img_class_init.getData()
 # -----------------------------------------------------------------------------
 # Non-linear transformation
 # -----------------------------------------------------------------------------
 # Step 1: Contrast adjustment
 #     01: Gamma correction
-img_nl01 = gammaCorrection(img_l_final, 0.9)
+img_nl01 = gammaCorrection(img_l_final, 0.5)
 #     02: Local histogram equality
 img_nl01 = applyLHE(img_nl01, 12.5, (16, 16))
 # Step 2: Star size reduction
