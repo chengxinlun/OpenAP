@@ -34,3 +34,6 @@ Example in ```OpenAP/tests```
 ```test_main.py``` outlines workflow associated with images with extended nebulosity.
 
 ```test_dso.py``` outlines workflow associated with images with little to none nebulosity.
+
+## Credit
+Thanks [@jinleic]( https://github.com/jinleic ) for inspiration and packaging.
