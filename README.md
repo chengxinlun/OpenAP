@@ -21,6 +21,8 @@
 * Histogram
 * Local histogram equilization
 * Logging
+* Masks: star mask, global threshold mask, etc.
+* RNC stretch (credit to Roger N. Clark for the functions)
 * Simple star detection
 * Star (PSF) fitting with 2D Gaussian (more PSF models in development)
 * Star size reduction
