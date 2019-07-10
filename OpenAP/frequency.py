@@ -145,3 +145,83 @@ def iATrousTransform(coeff, kernelFunc):
     None
     '''
     return np.sum(coeff, axis=0)
+
+
+def msLinearTransform(img_data, img_mask, maxLevel, tList, iList, sList,
+                      transFunc=[aTrousTransform, iATrousTransform],
+                      kernelFunc=starletKernel):
+    '''
+    Multi-scale Linear Transform
+    For noise reduction purpose, adapted from:
+        Starck J-L, Bijaoui A, Murtagh F (1995) Multiresolution support applied
+        to image filtering and deconvolution. CVGIP: Graph Models Image Process
+        57: 420-431
+
+    Parameters
+    ----------
+    img_data: 2D numpy.ndarray
+        Input image data. For colored image, extract its luminance channel and
+        then feed into this function
+    img_mask: 2D numpy.ndarray
+        Input image mask
+    maxLevel: int
+        Maximum level of decomposition
+    tList: numpy.array of float, length == maxLevel
+        List of threshold for each level, if filtering is not needed, use 0.0
+    iList: list of int, length == maxLevel
+        List of iterations for each level, if filtering is not needed for
+        certain level, use 0
+    sList: list of float, length == maxLevel, every value between 0.0 and 1.0
+        List of strength for each level, 0.0 for no modification, 1.0 for
+        denoise data only, value in between for linear combination of both
+    transFunc: list of functions, length == 2
+        [Transform function, inverse transform function]
+    kernelFunc: function
+        Kernel function for wavelet transform
+
+    Returns
+    -------
+    img_recon: 2D numpy.ndarray, same shape as img_data
+        Denoised image
+
+    Raises
+    ------
+    ValueError
+    '''
+    if len(tList) != maxLevel or len(iList) != maxLevel:
+        raise ValueError("tList and iList must have length of maxLevel")
+    if img_data.ndim != 2:
+        raise TypeError("img_data must be 2D. For colored image, extract" +
+                        " its luminance channel")
+    # Cast everything to everything to float64
+    img_data_64 = convertTo(img_data, np.float64)
+    img_mask_64 = convertTo(img_data, np.float64)
+    # Estimate the relation between image space and frequency space
+    # TODO: support look-up table for given transformation and kernel
+    img_test = np.random.normal(0.0, 1.0, (2048, 2048))
+    img_test_swt = transFunc[0](img_test, kernelFunc, maxLevel)
+    noise_sigma_coeff = np.std(img_test_swt[:-1], axis=(1, 2))
+    # Estimate noise of the image and determine filtering threshold
+    img_swt = transFunc[0](img_data_64, kernelFunc, maxLevel)
+    img_noise_sigma = np.std(img_swt[0]) / noise_sigma_coeff[0] * \
+        noise_sigma_coeff
+    print(img_noise_sigma[0] / noise_sigma_coeff[0])
+    thres_list = tList * img_noise_sigma
+    # Iteration
+    n = 0
+    sol = np.zeros_like(img_data_64)
+    err = np.zeros_like(img_data_64)
+    while n < np.max(iList):
+        err = img_data_64 - sol
+        err_swt = transFunc[0](err, kernelFunc, maxLevel)
+        # Filter each level except residual
+        for i in range(maxLevel):
+            if n < iList[i]:
+                tf = np.logical_and(err_swt[i] > -thres_list[i],
+                                    err_swt[i] < thres_list[i])
+                err_swt[i][tf] *= (1.0 - img_mask_64[tf] * sList[i])
+        # Reconstruct
+        err_iswt = transFunc[1](err_swt, kernelFunc)
+        sol += err_iswt
+        n += 1
+    return sol

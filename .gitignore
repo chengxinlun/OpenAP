@@ -123,6 +123,7 @@ dmypy.json
 .pyre/
 
 .DS_Store
+*.fits
 *.tif
 *.png
 *.jpg
