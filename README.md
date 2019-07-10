@@ -15,6 +15,9 @@
 ## Current Functionalities
 * 8-bit, 16-bit, 32-bit image conversion
 * Background subtraction (gradient removal included)
+* Chromatic adaptation (build-in D50 to/from D65 with XYZ scaling/Bradford/Von Kries method, custom white-point or method allowed)
+* Color matrix conversion (similar to that of ```imagemagick```)
+* Color space conversion (built-in sRGB to linear RGB D65, more in development)
 * Deconvolution (NOT recommended due to lack of deringing algorithm)
 * Gamma correction
 * High dynamic range 2D deconvolution
