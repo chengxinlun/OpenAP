@@ -9,6 +9,7 @@ __all__ = ["chromaticAdaptation", "colorConvert", "getLuminance",
 # White point
 white_D50 = np.array([0.96422, 1.0, 0.82521])
 white_D65 = np.array([0.95047, 1.0, 1.08883])
+white_E = np.array([1.0, 1.0, 1.0])
 # Response matrix
 response_XYZScaling = np.diag([1.0, 1.0, 1.0])
 response_Bradford = np.array([[0.8951, 0.2664, -0.1614],
@@ -59,7 +60,6 @@ def chromaticAdaptation(img_data, sourceWhite, destinationWhite, response):
     rho_ratio = rho_destin / rho_source
     rho_ratio = rho_ratio.reshape(-1, 1)
     color_matrix = np.matmul(np.linalg.inv(response), rho_ratio * response)
-    print(color_matrix)
     img_data_adapted = np.einsum("...i, ji->...j", img_data, color_matrix)
     return img_data_adapted
 
@@ -68,13 +68,11 @@ def colorConvert(img_data, convertMatrix):
     return np.einsum("...i, ji->...j", img_data, convertMatrix)
 
 
-def getLuminance(img_data, bgrWeight):
+def getLuminance(img_data):
     '''
-    Get the luminance of input image with given BGR weight. Computation detail:
+    Get the luminance of input image. Input image must be in XYZ colorspace.
+    Computation detail:
 
-    bgrWeight is normalized
-    img_data is converted to np.float64
-    y = np.einsum("i,...i->...", bgrWeight, img_data)
     l[y > 0.008856] = 116.0 * y ** (1/3) - 16.0
     l[y < 0.008856] = 903.3 * y
     lum = l * 0.01
@@ -93,11 +91,31 @@ def getLuminance(img_data, bgrWeight):
     lum: 2D numpy.ndarray
         Lumiance of the image
     '''
-    w = bgrWeight / np.sum(bgrWeight)
-    tmp = convertTo(img_data, np.float64)
-    tmp = np.einsum("i,...i->...", w, tmp)
-    lum = np.empty_like(tmp)
+    lum = np.empty_like(img_data[:, :, 1])
     lum[tmp > 0.008856] = 116.0 * (tmp[tmp > 0.008856] ** (1.0 / 3.0)) - 16.0
     lum[tmp <= 0.008856] = 903.3 * tmp[tmp <= 0.008856]
-    lum = convertTo(lum * 0.01, img_data.dtype)
+    lum = lum * 0.01
     return lum
+
+
+def getY(lum):
+    '''
+    Get Y from luminance. Compuation detail:
+
+    y[lum > 0.08] = ((y * 100.0 + 16.0) / 116.0) ** 3.0
+    y[lum < 0.08] = y * 100.0 / 903.3
+
+    Parameters
+    ----------
+    lum: 2D numpy.ndarray
+        Input luminance data
+
+    Returns
+    -------
+    y: 2D numpy.ndarray
+        Converted to Y
+    '''
+    y = np.empty_like(lum)
+    y[lum > 0.08] = ((lum * 100.0 + 16.0) / 116.0) ** 3.0
+    y[lum < 0.08] = lum * 100.0 / 903.3
+    return y
