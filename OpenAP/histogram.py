@@ -5,48 +5,7 @@ import numpy as np
 from .helper import max_type
 
 
-__all__ = ["calcHist", "plotHist", "applyLHE"]
-
-
-def calcHist(img_data):
-    '''
-    calcHist(img_data)
-
-    Calculate the histrogram of input data
-
-    img_data: 2 or 3 D numpy.ndarray, input image data
-    '''
-    hist_max = max_type(img_data.dtype)
-    if img_data.ndim == 2:
-        return cv2.calcHist([img_data], [0], None, [hist_max], [0, hist_max])
-    else:
-        hist = []
-        for i in range(img_data.shape[-1]):
-            hist.append(cv2.calcHist([img_data], [i], None, [hist_max],
-                                     [0, hist_max]))
-        return hist
-
-
-def plotHist(img_data, cc_list):
-    '''
-    plotHist(img_data(2 or 3D numpy.ndarray), cc_list(list of str))
-
-    Plot the histogram of input image
-
-    img_data: 2 or 3D numpy.ndarray, the image data
-    cc_list: list of str, name of color channel
-    '''
-    hist_max = max_type(img_data.dtype)
-    if img_data.ndim == 2:
-        plt.hist(img_data.ravel(), bins=256, range=(0, hist_max))
-        plt.xlabel(cc_list[0])
-    else:
-        for i in range(img_data.shape[-1]):
-            plt.hist(img_data[:, :, i].ravel(), bins=256, range=(0, hist_max),
-                     alpha=0.5, label=cc_list[i], color=cc_list[i])
-        plt.legend(loc='upper right')
-    plt.show()
-    plt.close()
+__all__ = ["applyLHE"]
 
 
 def applyLHE(img_data, clip_limit, grid_size):
