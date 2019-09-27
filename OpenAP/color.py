@@ -2,26 +2,29 @@ import numpy as np
 from .helper import convertTo
 
 
-__all__ = ["chromaticAdaptation", "colorConvert", "getLuminance",
+__all__ = ["chromaticAdaptation", "colorConvert", "getLuminance", "getY",
            "linearizeRGB"]
 
 
 # White point
-white_D50 = np.array([0.96422, 1.0, 0.82521])
-white_D65 = np.array([0.95047, 1.0, 1.08883])
-white_E = np.array([1.0, 1.0, 1.0])
+white_D50 = np.array([0.96422, 1.0, 0.82521], dtype=np.float64)
+white_D65 = np.array([0.95047, 1.0, 1.08883], dtype=np.float64)
+white_E = np.array([1.0, 1.0, 1.0], dtype=np.float64)
 # Response matrix
-response_XYZScaling = np.diag([1.0, 1.0, 1.0])
+response_XYZScaling = np.array([[1.0, 0.0, 0.0],
+                                [0.0, 1.0, 0.0],
+                                [0.0, 0.0, 1.0]], dtype=np.float64)
 response_Bradford = np.array([[0.8951, 0.2664, -0.1614],
                               [-0.7502, 1.7135, 0.0367],
-                              [0.0389, -0.0685, 1.0296]])
+                              [0.0389, -0.0685, 1.0296]], dtype=np.float64)
 response_VonKries = np.array([[0.40024, 0.7076, -0.08081],
                               [-0.2263, 1.16532, 0.0457],
-                              [0.0, 0.0, 0.91822]])
+                              [0.0, 0.0, 0.91822]], dtype=np.float64)
 # Color convert
 convert_sRGB2XYZ = np.array([[0.4124564, 0.3575761, 0.1804375],
                              [0.2126729, 0.7151522, 0.0721750],
-                             [0.0193339, 0.1191920, 0.9503041]])
+                             [0.0193339, 0.1191920, 0.9503041]],
+                            dtype=np.float64)
 
 
 def linearizeRGB(img_data):
@@ -58,14 +61,19 @@ def chromaticAdaptation(img_data, sourceWhite, destinationWhite, response):
     rho_source = np.einsum("ij, j->i", response, sourceWhite)
     rho_destin = np.einsum("ij, j->i", response, destinationWhite)
     rho_ratio = rho_destin / rho_source
-    rho_ratio = rho_ratio.reshape(-1, 1)
-    color_matrix = np.matmul(np.linalg.inv(response), rho_ratio * response)
+    rho_ratio = np.diag(rho_ratio)
+    color_matrix = np.linalg.inv(response) @ rho_ratio @ response
     img_data_adapted = np.einsum("...i, ji->...j", img_data, color_matrix)
+    # Clip the output due to float precision
+    np.clip(img_data_adapted, 0.0, 1.0, out=img_data_adapted)
     return img_data_adapted
 
 
 def colorConvert(img_data, convertMatrix):
-    return np.einsum("...i, ji->...j", img_data, convertMatrix)
+    tmp = np.einsum("...i, ji->...j", img_data, convertMatrix)
+    # Clip the output due to float precision
+    np.clip(tmp, 0.0, 1.0, out=tmp)
+    return tmp
 
 
 def getLuminance(img_data):
@@ -91,10 +99,13 @@ def getLuminance(img_data):
     lum: 2D numpy.ndarray
         Lumiance of the image
     '''
-    lum = np.empty_like(img_data[:, :, 1])
+    tmp = img_data[:, :, 1]
+    lum = np.empty_like(tmp)
     lum[tmp > 0.008856] = 116.0 * (tmp[tmp > 0.008856] ** (1.0 / 3.0)) - 16.0
     lum[tmp <= 0.008856] = 903.3 * tmp[tmp <= 0.008856]
     lum = lum * 0.01
+    # Clip the output due to float precision
+    np.clip(lum, 0.0, 1.0, out=lum)
     return lum
 
 
@@ -116,6 +127,8 @@ def getY(lum):
         Converted to Y
     '''
     y = np.empty_like(lum)
-    y[lum > 0.08] = ((lum * 100.0 + 16.0) / 116.0) ** 3.0
-    y[lum < 0.08] = lum * 100.0 / 903.3
+    y[lum > 0.08] = ((lum[lum > 0.08] * 100.0 + 16.0) / 116.0) ** 3.0
+    y[lum < 0.08] = lum[lum < 0.08] / 9.033
+    # Clip the output due to float precision
+    np.clip(y, 0.0, 1.0, out=y)
     return y
