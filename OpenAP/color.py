@@ -64,11 +64,15 @@ def chromaticAdaptation(img_data, sourceWhite, destinationWhite, response):
     rho_ratio = np.diag(rho_ratio)
     color_matrix = np.linalg.inv(response) @ rho_ratio @ response
     img_data_adapted = np.einsum("...i, ji->...j", img_data, color_matrix)
+    # Clip the output due to float precision
+    np.clip(img_data_adapted, 0.0, 1.0, out=img_data_adapted)
     return img_data_adapted
 
 
 def colorConvert(img_data, convertMatrix):
     tmp = np.einsum("...i, ji->...j", img_data, convertMatrix)
+    # Clip the output due to float precision
+    np.clip(tmp, 0.0, 1.0, out=tmp)
     return tmp
 
 
@@ -100,6 +104,8 @@ def getLuminance(img_data):
     lum[tmp > 0.008856] = 116.0 * (tmp[tmp > 0.008856] ** (1.0 / 3.0)) - 16.0
     lum[tmp <= 0.008856] = 903.3 * tmp[tmp <= 0.008856]
     lum = lum * 0.01
+    # Clip the output due to float precision
+    np.clip(lum, 0.0, 1.0, out=lum)
     return lum
 
 
@@ -123,4 +129,6 @@ def getY(lum):
     y = np.empty_like(lum)
     y[lum > 0.08] = ((lum[lum > 0.08] * 100.0 + 16.0) / 116.0) ** 3.0
     y[lum < 0.08] = lum[lum < 0.08] / 9.033
+    # Clip the output due to float precision
+    np.clip(y, 0.0, 1.0, out=y)
     return y
